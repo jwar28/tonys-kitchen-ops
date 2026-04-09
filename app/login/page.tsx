@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/utils";
 import { Eye, Lock, Mail } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 type LoginPageProps = {
@@ -20,32 +19,34 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   if (!hasSupabaseEnv) {
     return (
-      <main className="relative flex min-h-[100svh] items-center justify-center overflow-x-hidden px-4 py-6 supports-[min-height:100dvh]:min-h-[100dvh] sm:px-6 md:px-10">
-        <div className="mx-auto my-auto w-full max-w-md">
-          <div className="mb-4 flex flex-col items-center text-center">
-            <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
+      <main className="fixed inset-0 overflow-hidden px-4 py-4 sm:px-6 md:px-10">
+        <div className="flex min-h-full items-center justify-center">
+          <div className="mx-auto w-full max-w-md">
+            <div className="mb-3 flex flex-col items-center text-center">
+              <div className="relative mb-2 grid size-24 place-items-center overflow-hidden rounded-full sm:size-28">
               <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
-            </div>
-            <h1 className="text-4xl font-semibold tracking-tight text-primary">Tony&apos;s Kitchen Ops</h1>
-          </div>
-
-          <Card className="rounded-[1.8rem] border border-white/40 bg-[#f1f1f1]/95 px-4 py-4 shadow-[0_26px_70px_-42px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:px-6 sm:py-6">
-            <CardHeader className="space-y-1 p-0">
-              <CardTitle className="text-3xl tracking-tight text-foreground">Configura Supabase</CardTitle>
-              <CardDescription className="text-xs text-foreground/65">
-                Antes de iniciar sesion, agrega las variables del proyecto en `.env.local`.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-3 p-0 pt-4 text-sm text-muted-foreground">
-              <div className="rounded-[1.3rem] border border-primary/10 bg-primary/5 px-4 py-3 font-mono text-xs text-foreground/80">
-                NEXT_PUBLIC_SUPABASE_URL=...
-                <br />
-                NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
               </div>
-              <p>Encuentras estos valores en Supabase: Settings &gt; API.</p>
-            </CardContent>
-          </Card>
+              <h1 className="text-[2rem] font-semibold tracking-tight text-primary sm:text-4xl">Tony&apos;s Kitchen Ops</h1>
+            </div>
+
+            <Card className="rounded-[1.8rem] border border-white/40 bg-[#f1f1f1]/95 px-4 py-4 shadow-[0_26px_70px_-42px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:px-6 sm:py-6">
+              <CardHeader className="space-y-1 p-0">
+                <CardTitle className="text-[1.75rem] tracking-tight text-foreground sm:text-3xl">Configura Supabase</CardTitle>
+                <CardDescription className="text-xs text-foreground/65">
+                  Antes de iniciar sesion, agrega las variables del proyecto en `.env.local`.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-3 p-0 pt-4 text-sm text-muted-foreground">
+                <div className="rounded-[1.3rem] border border-primary/10 bg-primary/5 px-4 py-3 font-mono text-xs text-foreground/80">
+                  NEXT_PUBLIC_SUPABASE_URL=...
+                  <br />
+                  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+                </div>
+                <p>Encuentras estos valores en Supabase: Settings &gt; API.</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     );
@@ -84,21 +85,22 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <main className="relative flex min-h-[100svh] items-center justify-center overflow-x-hidden px-4 py-6 supports-[min-height:100dvh]:min-h-[100dvh] sm:px-6 md:px-10">
+    <main className="fixed inset-0 overflow-hidden px-4 py-4 sm:px-6 md:px-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_5%,hsl(8_76%_47%/_0.12),transparent_34%),radial-gradient(circle_at_95%_80%,hsl(18_85%_50%/_0.08),transparent_40%)]" />
 
-      <div className="mx-auto my-auto w-full max-w-md">
-        <div className="mb-4 flex flex-col items-center text-center">
-          <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
+      <div className="relative flex min-h-full items-center justify-center">
+        <div className="mx-auto w-full max-w-md">
+        <div className="mb-3 flex flex-col items-center text-center">
+          <div className="relative mb-2 grid size-24 place-items-center overflow-hidden rounded-full sm:size-28">
             <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
           </div>
-          <h1 className="text-4xl font-semibold tracking-tight text-primary">Tony&apos;s Kitchen Ops</h1>
+          <h1 className="text-[2rem] font-semibold tracking-tight text-primary sm:text-4xl">Tony&apos;s Kitchen Ops</h1>
           <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-foreground/60">Autenticidad en cada detalle</p>
         </div>
 
         <Card className="rounded-[1.8rem] border border-white/40 bg-[#f1f1f1]/95 px-4 py-4 shadow-[0_26px_70px_-42px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:px-6 sm:py-6">
           <CardHeader className="space-y-1 p-0">
-            <CardTitle className="text-3xl tracking-tight text-foreground">Bienvenido</CardTitle>
+            <CardTitle className="text-[1.75rem] tracking-tight text-foreground sm:text-3xl">Bienvenido</CardTitle>
             <CardDescription className="text-xs text-foreground/65">Ingresa para abrir tu panel.</CardDescription>
           </CardHeader>
 
@@ -139,12 +141,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 </div>
               </div>
 
-              <div className="flex justify-end">
-                <Link href="/auth/forgot-password" className="text-sm font-medium text-primary/90 transition hover:text-primary">
-                  Olvidaste tu contrasena?
-                </Link>
-              </div>
-
               {error ? (
                 <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {error}
@@ -161,6 +157,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
     </main>
   );
