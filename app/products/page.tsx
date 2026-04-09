@@ -1,3 +1,4 @@
+import { AppTopbar } from "@/components/app-topbar";
 import { CreateProductDialog } from "@/components/products/create-product-dialog";
 import { ProductsCatalog } from "@/components/products/products-catalog";
 import { ProductsStatusToast } from "@/components/products/products-status-toast";
@@ -7,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Enums, Tables, TablesInsert, TablesUpdate } from "@/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/utils";
-import { ArrowUpDown, Package, Store, Tag, ToggleLeft } from "lucide-react";
+import { ArrowUpDown, Package, Tag, ToggleLeft } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -476,25 +478,20 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <div className="mx-auto w-full max-w-md space-y-5">
         <ProductsStatusToast success={params.success} error={params.error} />
 
-        <header className="relative overflow-hidden rounded-[2rem] border border-white/45 bg-[linear-gradient(140deg,rgba(255,255,255,0.95),rgba(242,234,225,0.9))] px-5 py-5 shadow-[0_30px_70px_-48px_rgba(0,0,0,0.6)]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(217,70,45,0.1),transparent_26%),radial-gradient(circle_at_90%_10%,rgba(255,202,116,0.18),transparent_24%)]" />
-          <div className="relative flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-foreground/55">Catalogo</p>
-              <h1 className="mt-1 text-4xl font-bold tracking-tight text-primary">Productos</h1>
-              <p className="mt-2 max-w-[16rem] text-sm text-muted-foreground">
-                Organiza lo que vendes, controla precios y manten visible lo que realmente esta en menu.
-              </p>
-            </div>
-            <div className="grid size-16 shrink-0 place-items-center rounded-[1.4rem] border border-primary/15 bg-white/80 text-primary shadow-sm">
-              <Store className="size-7" />
-            </div>
-          </div>
-          <div className="relative mt-4 rounded-[1.35rem] border border-primary/15 bg-white/75 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/55">Negocio actual</p>
-            <p className="mt-1 text-lg font-semibold">{businessName}</p>
-          </div>
-        </header>
+        <AppTopbar
+          eyebrow="Catalogo"
+          title="Productos"
+          description={`${businessName} · Organiza lo que vendes`}
+          rightSlot={
+            <Link
+              href="/"
+              className="relative grid size-[4.35rem] place-items-center overflow-hidden rounded-[1.35rem] border border-primary/15 bg-white/85 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.45)] transition hover:brightness-105"
+              aria-label="Volver al dashboard"
+            >
+              <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
+            </Link>
+          }
+        />
 
         <section className="grid grid-cols-2 gap-3">
           <Card className="rounded-[1.6rem] border-border/60 bg-card/95">

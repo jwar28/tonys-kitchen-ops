@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import { Enums, Tables } from "@/database.types";
 import { cn } from "@/lib/utils";
-import { FolderOpen, Funnel, ImagePlus, Package, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
+import { FolderOpen, Funnel, ImagePlus, Package, Pencil, Search, ToggleLeft, ToggleRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -66,6 +66,7 @@ export function ProductsCatalog({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatusFilter);
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(initialCategoryFilter);
   const [editingProduct, setEditingProduct] = useState<ProductRow | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getCategoryMeta = (category: ProductCategory) =>
     categoryOptions.find((option) => option.value === category) ?? categoryOptions[3];
@@ -74,8 +75,13 @@ export function ProductsCatalog({
     const statusMatches =
       statusFilter === "all" ? true : statusFilter === "active" ? product.is_active : !product.is_active;
     const categoryMatches = categoryFilter === "all" ? true : product.category === categoryFilter;
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const searchMatches =
+      normalizedQuery.length === 0
+        ? true
+        : `${product.name} ${product.unit} ${product.category}`.toLowerCase().includes(normalizedQuery);
 
-    return statusMatches && categoryMatches;
+    return statusMatches && categoryMatches && searchMatches;
   });
 
   const statusLabel = statusFilter === "active" ? "Activos" : statusFilter === "inactive" ? "Inactivos" : "Todos";
@@ -84,7 +90,7 @@ export function ProductsCatalog({
   return (
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-semibold tracking-tight">Listado</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {filteredProducts.length} {filteredProducts.length === 1 ? "producto encontrado" : "productos encontrados"}
@@ -162,6 +168,16 @@ export function ProductsCatalog({
             </PopoverContent>
           </Popover>
         </div>
+      </div>
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-foreground/45" />
+        <Input
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Buscar por nombre, unidad o categoria"
+          className="h-12 rounded-[1.2rem] border-white/60 bg-white/88 pl-11 pr-4 shadow-[0_14px_32px_-30px_rgba(0,0,0,0.45)] placeholder:text-foreground/35"
+        />
       </div>
 
       {filteredProducts.length > 0 ? (

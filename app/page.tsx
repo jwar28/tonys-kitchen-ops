@@ -1,3 +1,4 @@
+import { AppTopbar } from "@/components/app-topbar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -238,32 +239,32 @@ async function HomeContent() {
   return (
     <main className="px-4 pb-28 pt-6">
       <div className="mx-auto w-full max-w-md space-y-5">
-        <header className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/55">Vista general</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-primary">Dashboard</h1>
-            <p className="mt-1 text-xs text-muted-foreground">{nombreNegocio} · {dateLabel}</p>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="relative grid size-20 place-items-center overflow-hidden rounded-full transition hover:brightness-105"
-                aria-label="Abrir menu de usuario"
-              >
-                <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 rounded-xl p-2">
-              <DropdownMenuLabel className="px-2 pb-1 text-xs text-muted-foreground">Sesion activa</DropdownMenuLabel>
-              <form action={signOutAction}>
-                <Button type="submit" variant="outline" className="h-9 w-full rounded-lg text-sm">
-                  Cerrar sesion
-                </Button>
-              </form>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
+        <AppTopbar
+          eyebrow="Vista general"
+          title="Dashboard"
+          description={`${nombreNegocio} · ${dateLabel}`}
+          rightSlot={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="relative grid size-[4.35rem] place-items-center overflow-hidden rounded-[1.35rem] border border-primary/15 bg-white/85 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.45)] transition hover:brightness-105"
+                  aria-label="Abrir menu de usuario"
+                >
+                  <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44 rounded-xl p-2">
+                <DropdownMenuLabel className="px-2 pb-1 text-xs text-muted-foreground">Sesion activa</DropdownMenuLabel>
+                <form action={signOutAction}>
+                  <Button type="submit" variant="outline" className="h-9 w-full rounded-lg text-sm">
+                    Cerrar sesion
+                  </Button>
+                </form>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
+        />
 
         {currentDay?.status === "open" ? (
           <Card className="rounded-2xl border-primary/35 bg-primary/10">
