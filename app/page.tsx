@@ -1,14 +1,15 @@
 import { AppTopbar } from "@/components/app-topbar";
 import { DashboardUserMenu } from "@/components/dashboard-user-menu";
+import { PageSkeleton } from "@/components/loading/page-skeleton";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Tables } from "@/database.types";
+import { isBoneyardServerRequest } from "@/lib/boneyard";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/utils";
 import { AlertTriangle, Package, Receipt, ShoppingBag, Store, Wallet } from "lucide-react";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 type MembershipRow = Pick<Tables<"user_business_roles">, "business_id" | "role">;
 type BusinessRow = Pick<Tables<"businesses">, "name" | "currency_code">;
@@ -28,33 +29,17 @@ type StockWithProduct = Pick<Tables<"day_inventory">, "product_id" | "available_
   } | null;
 };
 
-function DashboardFallback() {
-  return (
-    <main className="px-4 pb-28 pt-6">
-      <div className="mx-auto w-full max-w-md animate-pulse space-y-4">
-        <div className="h-4 w-28 rounded bg-secondary" />
-        <div className="h-8 w-44 rounded bg-secondary" />
-        <div className="h-20 rounded-2xl bg-card" />
-        <div className="grid grid-cols-2 gap-3">
-          <div className="h-24 rounded-2xl bg-card" />
-          <div className="h-24 rounded-2xl bg-card" />
-          <div className="h-24 rounded-2xl bg-card" />
-          <div className="h-24 rounded-2xl bg-card" />
-        </div>
-      </div>
-    </main>
-  );
-}
-
 export default function Home() {
-  return (
-    <Suspense fallback={<DashboardFallback />}>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 }
 
 async function HomeContent() {
+  const isBoneyard = await isBoneyardServerRequest();
+
+  async function noopSignOutAction() {
+    "use server";
+  }
+
   if (!hasSupabaseEnv) {
     return (
       <main className="px-4 pb-28 pt-6">
@@ -77,6 +62,74 @@ async function HomeContent() {
           </Card>
         </div>
       </main>
+    );
+  }
+
+  if (isBoneyard) {
+    return (
+      <PageSkeleton name="dashboard-page">
+        <main className="px-4 pb-28 pt-6">
+          <div className="mx-auto w-full max-w-md space-y-5">
+            <AppTopbar
+              eyebrow="Vista general"
+              title="Dashboard"
+              description="Tony's Delicious Snacks · Sin dia operativo"
+              rightSlot={<DashboardUserMenu signOutAction={noopSignOutAction} />}
+            />
+
+            <Card className="rounded-2xl border-amber-400/40 bg-amber-100/50">
+              <CardContent className="flex items-start gap-3 p-4">
+                <Store className="mt-0.5 size-5 text-amber-700" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">No hay dia operativo activo</p>
+                  <p className="text-xs text-muted-foreground">Abre el dia para empezar a registrar ventas y gastos.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold tracking-tight">Rendimiento de hoy</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {["Ventas", "Unidades", "Egresos", "Utilidad"].map((label, index) => {
+                  const icons = [Wallet, ShoppingBag, Receipt, Package];
+                  const Icon = icons[index]!;
+
+                  return (
+                    <Card key={label} className="rounded-2xl border-border/70 bg-card/95">
+                      <CardContent className="space-y-2 p-4">
+                        <Icon className="size-4 text-primary" />
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+                        <p className="text-2xl font-semibold leading-none">$ 0</p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold tracking-tight">Producto destacado</h2>
+              <Card className="rounded-2xl border-border/70 bg-card/95">
+                <CardContent className="space-y-2 p-4">
+                  <p className="text-lg font-semibold">Sin ventas registradas</p>
+                  <p className="text-sm text-muted-foreground">Cuando registres ventas, aqui veras el producto mas vendido del dia.</p>
+                </CardContent>
+              </Card>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold tracking-tight">Estado de stock</h2>
+              <Card className="rounded-2xl border-border/70 bg-card/95">
+                <CardContent className="space-y-3 p-4">
+                  <p className="text-sm text-muted-foreground">Sin inventario cargado para el dia actual.</p>
+                </CardContent>
+              </Card>
+            </section>
+          </div>
+
+          <MobileBottomNav active="dashboard" />
+        </main>
+      </PageSkeleton>
     );
   }
 
@@ -236,124 +289,124 @@ async function HomeContent() {
   const nombreNegocio = business?.name ?? "Tony's Kitchen Ops";
   const moneda = business?.currency_code ?? "COP";
   return (
-    <main className="px-4 pb-28 pt-6">
-      <div className="mx-auto w-full max-w-md space-y-5">
-        <AppTopbar
-          eyebrow="Vista general"
-          title="Dashboard"
-          description={`${nombreNegocio} · ${dateLabel}`}
-          rightSlot={<DashboardUserMenu signOutAction={signOutAction} />}
-        />
+    <PageSkeleton name="dashboard-page">
+      <main className="px-4 pb-28 pt-6">
+        <div className="mx-auto w-full max-w-md space-y-5">
+          <AppTopbar
+            eyebrow="Vista general"
+            title="Dashboard"
+            description={`${nombreNegocio} · ${dateLabel}`}
+            rightSlot={<DashboardUserMenu signOutAction={signOutAction} />}
+          />
 
-        {currentDay?.status === "open" ? (
-          <Card className="rounded-2xl border-primary/35 bg-primary/10">
-            <CardContent className="flex items-start gap-3 p-4">
-              <AlertTriangle className="mt-0.5 size-5 text-primary" />
-              <div>
-                <p className="text-sm font-semibold text-foreground">Dia operativo abierto</p>
-                <p className="text-xs text-muted-foreground">
-                  {stockCritico.length > 0
-                    ? `${stockCritico.length} productos requieren reposicion prioritaria.`
-                    : "Inventario en buen estado para continuar vendiendo."}
+          {currentDay?.status === "open" ? (
+            <Card className="rounded-2xl border-primary/35 bg-primary/10">
+              <CardContent className="flex items-start gap-3 p-4">
+                <AlertTriangle className="mt-0.5 size-5 text-primary" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Dia operativo abierto</p>
+                  <p className="text-xs text-muted-foreground">
+                    {stockCritico.length > 0
+                      ? `${stockCritico.length} productos requieren reposicion prioritaria.`
+                      : "Inventario en buen estado para continuar vendiendo."}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="rounded-2xl border-amber-400/40 bg-amber-100/50">
+              <CardContent className="flex items-start gap-3 p-4">
+                <Store className="mt-0.5 size-5 text-amber-700" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">No hay dia operativo activo</p>
+                  <p className="text-xs text-muted-foreground">Abre el dia para empezar a registrar ventas y gastos.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold tracking-tight">Rendimiento de hoy</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="rounded-2xl border-border/70 bg-card/95">
+                <CardContent className="space-y-2 p-4">
+                  <Wallet className="size-4 text-primary" />
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Ventas</p>
+                  <p className="text-2xl font-semibold leading-none">{formatCurrency(totalVentas, moneda)}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border-border/70 bg-card/95">
+                <CardContent className="space-y-2 p-4">
+                  <ShoppingBag className="size-4 text-primary" />
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Unidades</p>
+                  <p className="text-2xl font-semibold leading-none">{totalUnidades.toLocaleString("es-CO")}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border-border/70 bg-card/95">
+                <CardContent className="space-y-2 p-4">
+                  <Receipt className="size-4 text-primary" />
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Egresos</p>
+                  <p className="text-2xl font-semibold leading-none">{formatCurrency(totalEgresos, moneda)}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border-border/70 bg-card/95">
+                <CardContent className="space-y-2 p-4">
+                  <Package className="size-4 text-primary" />
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Utilidad</p>
+                  <p className="text-2xl font-semibold leading-none">{formatCurrency(utilidadEstimada, moneda)}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold tracking-tight">Producto destacado</h2>
+            <Card className="rounded-2xl border-border/70 bg-card/95">
+              <CardContent className="space-y-2 p-4">
+                <p className="text-lg font-semibold">{topProduct?.name ?? "Sin ventas registradas"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {topProduct
+                    ? `${topProduct.quantity.toLocaleString("es-CO")} unidades · ${formatCurrency(topProduct.total, moneda)}`
+                    : "Cuando registres ventas, aqui veras el producto mas vendido del dia."}
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="rounded-2xl border-amber-400/40 bg-amber-100/50">
-            <CardContent className="flex items-start gap-3 p-4">
-              <Store className="mt-0.5 size-5 text-amber-700" />
-              <div>
-                <p className="text-sm font-semibold text-foreground">No hay dia operativo activo</p>
-                <p className="text-xs text-muted-foreground">Abre el dia para empezar a registrar ventas y gastos.</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold tracking-tight">Rendimiento de hoy</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="rounded-2xl border-border/70 bg-card/95">
-              <CardContent className="space-y-2 p-4">
-                <Wallet className="size-4 text-primary" />
-                <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Ventas</p>
-                <p className="text-2xl font-semibold leading-none">{formatCurrency(totalVentas, moneda)}</p>
               </CardContent>
             </Card>
+          </section>
 
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold tracking-tight">Estado de stock</h2>
             <Card className="rounded-2xl border-border/70 bg-card/95">
-              <CardContent className="space-y-2 p-4">
-                <ShoppingBag className="size-4 text-primary" />
-                <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Unidades</p>
-                <p className="text-2xl font-semibold leading-none">{totalUnidades.toLocaleString("es-CO")}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-2xl border-border/70 bg-card/95">
-              <CardContent className="space-y-2 p-4">
-                <Receipt className="size-4 text-primary" />
-                <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Egresos</p>
-                <p className="text-2xl font-semibold leading-none">{formatCurrency(totalEgresos, moneda)}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-2xl border-border/70 bg-card/95">
-              <CardContent className="space-y-2 p-4">
-                <Package className="size-4 text-primary" />
-                <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Utilidad</p>
-                <p className="text-2xl font-semibold leading-none">{formatCurrency(utilidadEstimada, moneda)}</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold tracking-tight">Producto destacado</h2>
-          <Card className="rounded-2xl border-border/70 bg-card/95">
-            <CardContent className="space-y-2 p-4">
-              <p className="text-lg font-semibold">
-                {topProduct?.name ?? "Sin ventas registradas"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {topProduct
-                  ? `${topProduct.quantity.toLocaleString("es-CO")} unidades · ${formatCurrency(topProduct.total, moneda)}`
-                  : "Cuando registres ventas, aqui veras el producto mas vendido del dia."}
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold tracking-tight">Estado de stock</h2>
-          <Card className="rounded-2xl border-border/70 bg-card/95">
-            <CardContent className="space-y-3 p-4">
-              {stockSummary.length > 0 ? (
-                stockSummary.slice(0, 4).map((item) => (
-                  <div key={item.name} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-sm font-medium">{item.name}</p>
-                      <p className={`text-xs font-semibold ${item.percentage <= 25 ? "text-destructive" : "text-foreground/70"}`}>
-                        {item.percentage}%
-                      </p>
+              <CardContent className="space-y-3 p-4">
+                {stockSummary.length > 0 ? (
+                  stockSummary.slice(0, 4).map((item) => (
+                    <div key={item.name} className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="truncate text-sm font-medium">{item.name}</p>
+                        <p className={`text-xs font-semibold ${item.percentage <= 25 ? "text-destructive" : "text-foreground/70"}`}>
+                          {item.percentage}%
+                        </p>
+                      </div>
+                      <div className="h-2 rounded-full bg-secondary">
+                        <div
+                          className={`h-2 rounded-full ${item.percentage <= 25 ? "bg-destructive" : "bg-emerald-500"}`}
+                          style={{ width: `${Math.min(Math.max(item.percentage, 4), 100)}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 rounded-full bg-secondary">
-                      <div
-                        className={`h-2 rounded-full ${item.percentage <= 25 ? "bg-destructive" : "bg-emerald-500"}`}
-                        style={{ width: `${Math.min(Math.max(item.percentage, 4), 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">Sin inventario cargado para el dia actual.</p>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sin inventario cargado para el dia actual.</p>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        </div>
 
-      <MobileBottomNav active="dashboard" />
-    </main>
+        <MobileBottomNav active="dashboard" />
+      </main>
+    </PageSkeleton>
   );
 }

@@ -1,11 +1,13 @@
 import { AppTopbar } from "@/components/app-topbar";
 import { CreateProductDialog } from "@/components/products/create-product-dialog";
+import { PageSkeleton } from "@/components/loading/page-skeleton";
 import { ProductsCatalog } from "@/components/products/products-catalog";
 import { ProductsStatusToast } from "@/components/products/products-status-toast";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Enums, Tables, TablesInsert, TablesUpdate } from "@/database.types";
+import { isBoneyardServerRequest } from "@/lib/boneyard";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/utils";
 import { ArrowUpDown, Package, Tag, ToggleLeft } from "lucide-react";
@@ -206,6 +208,7 @@ async function requireViewerContext() {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
+  const isBoneyard = await isBoneyardServerRequest();
 
   if (!hasSupabaseEnv) {
     return (
@@ -226,6 +229,91 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </Card>
         </div>
       </main>
+    );
+  }
+
+  if (isBoneyard) {
+    const sampleProducts = [
+      {
+        id: "sample-1",
+        business_id: "sample-business",
+        name: "Empanada de pollo",
+        category: "frito",
+        unit: "unidad",
+        sale_price: 3500,
+        cost_price: 1600,
+        is_active: true,
+        sort_order: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: null,
+        reference_image: null,
+      },
+      {
+        id: "sample-2",
+        business_id: "sample-business",
+        name: "Pizza personal",
+        category: "pizza",
+        unit: "unidad",
+        sale_price: 12000,
+        cost_price: 6400,
+        is_active: true,
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: null,
+        reference_image: null,
+      },
+    ] satisfies ProductRow[];
+
+    async function noopAction() {
+      "use server";
+    }
+
+    return (
+      <PageSkeleton name="products-page">
+        <main className="px-4 pb-28 pt-6">
+          <div className="mx-auto w-full max-w-md space-y-5">
+            <AppTopbar
+              eyebrow="Catalogo"
+              title="Productos"
+              description="Tony's Delicious Snacks · Organiza lo que vendes"
+              rightSlot={
+                <Link href="/" className="transition hover:brightness-105" aria-label="Volver al dashboard">
+                  <Image
+                    src="/logo.png"
+                    alt="Tony's Kitchen Ops"
+                    width={120}
+                    height={120}
+                    className="h-[5.75rem] w-[5.75rem] object-contain object-center"
+                    unoptimized
+                  />
+                </Link>
+              }
+            />
+
+            <section className="grid grid-cols-2 gap-3">
+              <Card className="rounded-[1.6rem] border-border/60 bg-card/95"><CardContent className="space-y-2 p-4"><Package className="size-4 text-primary" /><p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Activos</p><p className="text-2xl font-semibold leading-none">2</p></CardContent></Card>
+              <Card className="rounded-[1.6rem] border-border/60 bg-card/95"><CardContent className="space-y-2 p-4"><ToggleLeft className="size-4 text-primary" /><p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Inactivos</p><p className="text-2xl font-semibold leading-none">0</p></CardContent></Card>
+              <Card className="rounded-[1.6rem] border-border/60 bg-card/95"><CardContent className="space-y-2 p-4"><Tag className="size-4 text-primary" /><p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Categorias</p><p className="text-2xl font-semibold leading-none">2</p></CardContent></Card>
+              <Card className="rounded-[1.6rem] border-border/60 bg-card/95"><CardContent className="space-y-2 p-4"><ArrowUpDown className="size-4 text-primary" /><p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Ganancia potencial</p><p className="text-2xl font-semibold leading-none">{formatCurrency(7500, "COP")}</p></CardContent></Card>
+            </section>
+
+            <ProductsCatalog
+              currencyCode="COP"
+              initialCategoryFilter="all"
+              initialStatusFilter="active"
+              products={sampleProducts}
+              categoryOptions={categoryOptions}
+              updateProductAction={noopAction}
+              toggleProductAction={noopAction}
+            />
+          </div>
+
+          <CreateProductDialog action={noopAction} categories={categoryOptions.map(({ value, label }) => ({ value, label }))} />
+          <MobileBottomNav active="products" />
+        </main>
+      </PageSkeleton>
     );
   }
 
@@ -474,79 +562,81 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   );
 
   return (
-    <main className="px-4 pb-28 pt-6">
-      <div className="mx-auto w-full max-w-md space-y-5">
-        <ProductsStatusToast success={params.success} error={params.error} />
+    <PageSkeleton name="products-page">
+      <main className="px-4 pb-28 pt-6">
+        <div className="mx-auto w-full max-w-md space-y-5">
+          <ProductsStatusToast success={params.success} error={params.error} />
 
-        <AppTopbar
-          eyebrow="Catalogo"
-          title="Productos"
-          description={`${businessName} · Organiza lo que vendes`}
-          rightSlot={
-            <Link
-              href="/"
-              className="transition hover:brightness-105"
-              aria-label="Volver al dashboard"
-            >
-              <Image
-                src="/logo.png"
-                alt="Tony's Kitchen Ops"
-                width={120}
-                height={120}
-                className="h-[5.75rem] w-[5.75rem] object-contain object-center"
-                unoptimized
-              />
-            </Link>
-          }
+          <AppTopbar
+            eyebrow="Catalogo"
+            title="Productos"
+            description={`${businessName} · Organiza lo que vendes`}
+            rightSlot={
+              <Link
+                href="/"
+                className="transition hover:brightness-105"
+                aria-label="Volver al dashboard"
+              >
+                <Image
+                  src="/logo.png"
+                  alt="Tony's Kitchen Ops"
+                  width={120}
+                  height={120}
+                  className="h-[5.75rem] w-[5.75rem] object-contain object-center"
+                  unoptimized
+                />
+              </Link>
+            }
+          />
+
+          <section className="grid grid-cols-2 gap-3">
+            <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
+              <CardContent className="space-y-2 p-4">
+                <Package className="size-4 text-primary" />
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Activos</p>
+                <p className="text-2xl font-semibold leading-none">{activeProducts}</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
+              <CardContent className="space-y-2 p-4">
+                <ToggleLeft className="size-4 text-primary" />
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Inactivos</p>
+                <p className="text-2xl font-semibold leading-none">{inactiveProducts}</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
+              <CardContent className="space-y-2 p-4">
+                <Tag className="size-4 text-primary" />
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Categorias</p>
+                <p className="text-2xl font-semibold leading-none">{usedCategories}</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
+              <CardContent className="space-y-2 p-4">
+                <ArrowUpDown className="size-4 text-primary" />
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Ganancia potencial</p>
+                <p className="text-2xl font-semibold leading-none">{formatCurrency(totalPotentialProfit, currencyCode)}</p>
+              </CardContent>
+            </Card>
+          </section>
+
+          <ProductsCatalog
+            currencyCode={currencyCode}
+            initialCategoryFilter={categoryFilter}
+            initialStatusFilter={statusFilter}
+            products={products}
+            categoryOptions={categoryOptions}
+            updateProductAction={updateProductAction}
+            toggleProductAction={toggleProductAction}
+          />
+        </div>
+
+        <CreateProductDialog
+          action={createProductAction}
+          categories={categoryOptions.map(({ value, label }) => ({ value, label }))}
         />
-
-        <section className="grid grid-cols-2 gap-3">
-          <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
-            <CardContent className="space-y-2 p-4">
-              <Package className="size-4 text-primary" />
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Activos</p>
-              <p className="text-2xl font-semibold leading-none">{activeProducts}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
-            <CardContent className="space-y-2 p-4">
-              <ToggleLeft className="size-4 text-primary" />
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Inactivos</p>
-              <p className="text-2xl font-semibold leading-none">{inactiveProducts}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
-            <CardContent className="space-y-2 p-4">
-              <Tag className="size-4 text-primary" />
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Categorias</p>
-              <p className="text-2xl font-semibold leading-none">{usedCategories}</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[1.6rem] border-border/60 bg-card/95">
-            <CardContent className="space-y-2 p-4">
-              <ArrowUpDown className="size-4 text-primary" />
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Ganancia potencial</p>
-              <p className="text-2xl font-semibold leading-none">{formatCurrency(totalPotentialProfit, currencyCode)}</p>
-            </CardContent>
-          </Card>
-        </section>
-
-        <ProductsCatalog
-          currencyCode={currencyCode}
-          initialCategoryFilter={categoryFilter}
-          initialStatusFilter={statusFilter}
-          products={products}
-          categoryOptions={categoryOptions}
-          updateProductAction={updateProductAction}
-          toggleProductAction={toggleProductAction}
-        />
-      </div>
-
-      <CreateProductDialog
-        action={createProductAction}
-        categories={categoryOptions.map(({ value, label }) => ({ value, label }))}
-      />
-      <MobileBottomNav active="products" />
-    </main>
+        <MobileBottomNav active="products" />
+      </main>
+    </PageSkeleton>
   );
 }

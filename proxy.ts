@@ -1,3 +1,4 @@
+import { isBoneyardRequest } from "@/lib/boneyard";
 import { updateSession } from "@/lib/supabase/proxy";
 import { hasSupabaseEnv } from "@/lib/utils";
 import { type NextRequest, NextResponse } from "next/server";
@@ -6,6 +7,10 @@ const PUBLIC_ROUTES = ["/login"];
 const PUBLIC_PREFIXES = ["/auth/confirm"];
 
 export async function proxy(request: NextRequest) {
+  if (isBoneyardRequest(request)) {
+    return NextResponse.next();
+  }
+
   if (!hasSupabaseEnv) {
     return NextResponse.next();
   }
