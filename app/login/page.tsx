@@ -20,8 +20,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   if (!hasSupabaseEnv) {
     return (
-      <main className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-4 sm:px-6 md:px-10">
-        <div className="mx-auto w-full max-w-md">
+      <main className="relative flex min-h-[100svh] items-center justify-center overflow-x-hidden px-4 py-6 supports-[min-height:100dvh]:min-h-[100dvh] sm:px-6 md:px-10">
+        <div className="mx-auto my-auto w-full max-w-md">
           <div className="mb-4 flex flex-col items-center text-center">
             <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
               <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
@@ -84,10 +84,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <main className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-4 sm:px-6 md:px-10">
+    <main className="relative flex min-h-[100svh] items-center justify-center overflow-x-hidden px-4 py-6 supports-[min-height:100dvh]:min-h-[100dvh] sm:px-6 md:px-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_5%,hsl(8_76%_47%/_0.12),transparent_34%),radial-gradient(circle_at_95%_80%,hsl(18_85%_50%/_0.08),transparent_40%)]" />
 
-      <div className="mx-auto w-full max-w-md">
+      <div className="mx-auto my-auto w-full max-w-md">
         <div className="mb-4 flex flex-col items-center text-center">
           <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
             <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
