@@ -37,8 +37,8 @@ export function CreateProductDialog({ action, categories }: CreateProductDialogP
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-[calc(100%-1.5rem)] rounded-[2rem] border-white/40 bg-[linear-gradient(180deg,rgba(255,248,243,0.98),rgba(255,255,255,0.97))] p-0 shadow-[0_32px_80px_-44px_rgba(0,0,0,0.75)] sm:max-w-md">
-        <div className="overflow-hidden rounded-[2rem]">
+      <DialogContent className="max-h-[min(92vh,48rem)] max-w-[calc(100%-1.5rem)] overflow-hidden rounded-[2rem] border-white/40 bg-[linear-gradient(180deg,rgba(255,248,243,0.98),rgba(255,255,255,0.97))] p-0 shadow-[0_32px_80px_-44px_rgba(0,0,0,0.75)] sm:max-w-md">
+        <div className="flex max-h-[min(92vh,48rem)] flex-col overflow-hidden rounded-[2rem]">
           <DialogHeader className="border-b border-primary/10 px-5 pb-4 pt-6 text-left">
             <DialogTitle className="text-2xl tracking-tight text-foreground">Nuevo producto</DialogTitle>
             <DialogDescription className="text-sm">
@@ -46,7 +46,7 @@ export function CreateProductDialog({ action, categories }: CreateProductDialogP
             </DialogDescription>
           </DialogHeader>
 
-          <form action={action} className="space-y-4 px-5 py-5">
+          <form action={action} className="space-y-4 overflow-y-auto px-5 py-5">
             <div className="space-y-1.5">
               <Label htmlFor="create-name" className="pl-1 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/55">
                 Nombre

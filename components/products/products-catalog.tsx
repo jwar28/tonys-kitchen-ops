@@ -294,8 +294,8 @@ export function ProductsCatalog({
       )}
 
       <Dialog open={Boolean(editingProduct)} onOpenChange={(open) => !open && setEditingProduct(null)}>
-        <DialogContent className="max-w-[calc(100%-1.5rem)] rounded-[2rem] border-white/40 bg-[linear-gradient(180deg,rgba(255,248,243,0.98),rgba(255,255,255,0.97))] p-0 shadow-[0_32px_80px_-44px_rgba(0,0,0,0.75)] sm:max-w-md">
-          <div className="overflow-hidden rounded-[2rem]">
+        <DialogContent className="max-h-[min(92vh,48rem)] max-w-[calc(100%-1.5rem)] overflow-hidden rounded-[2rem] border-white/40 bg-[linear-gradient(180deg,rgba(255,248,243,0.98),rgba(255,255,255,0.97))] p-0 shadow-[0_32px_80px_-44px_rgba(0,0,0,0.75)] sm:max-w-md">
+          <div className="flex max-h-[min(92vh,48rem)] flex-col overflow-hidden rounded-[2rem]">
             <DialogHeader className="border-b border-primary/10 px-5 pb-4 pt-6 text-left">
               <DialogTitle className="text-2xl tracking-tight text-foreground">Editar producto</DialogTitle>
               <DialogDescription className="text-sm">
@@ -304,7 +304,7 @@ export function ProductsCatalog({
             </DialogHeader>
 
             {editingProduct ? (
-              <form action={updateProductAction} className="space-y-4 px-5 py-5">
+              <form action={updateProductAction} className="space-y-4 overflow-y-auto px-5 py-5">
                 <input type="hidden" name="product_id" value={editingProduct.id} />
                 <input type="hidden" name="current_name" value={editingProduct.name} />
                 <input type="hidden" name="current_reference_image" value={editingProduct.reference_image ?? ""} />

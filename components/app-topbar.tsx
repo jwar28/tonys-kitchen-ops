@@ -22,7 +22,7 @@ export function AppTopbar({ eyebrow, title, description, rightSlot, className }:
         <h1 className="mt-1 text-[1.9rem] font-bold tracking-tight text-primary">{title}</h1>
         {description ? <p className="mt-1 truncate text-xs text-muted-foreground">{description}</p> : null}
       </div>
-      <div className="shrink-0">{rightSlot}</div>
+      <div className="flex shrink-0 items-center justify-center self-center">{rightSlot}</div>
     </header>
   );
 }
