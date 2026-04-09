@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Tables } from "@/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -346,26 +347,7 @@ async function HomeContent() {
         </section>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border/70 bg-card/95 px-4 pb-4 pt-3 backdrop-blur">
-        <div className="mx-auto grid w-full max-w-md grid-cols-4 gap-2 rounded-2xl bg-background/70 p-2">
-          <div className="flex flex-col items-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-primary-foreground shadow-sm">
-            <Store className="size-4.5" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.08em]">Inicio</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-muted-foreground">
-            <Package className="size-4" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.08em]">Productos</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-muted-foreground">
-            <ShoppingBag className="size-4" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.08em]">Ventas</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-muted-foreground">
-            <Wallet className="size-4" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.08em]">Caja</span>
-          </div>
-        </div>
-      </nav>
+      <MobileBottomNav active="dashboard" />
     </main>
   );
 }
