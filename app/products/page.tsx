@@ -485,10 +485,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           rightSlot={
             <Link
               href="/"
-              className="relative grid size-[4.35rem] place-items-center overflow-hidden rounded-[1.35rem] border border-primary/15 bg-white/85 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.45)] transition hover:brightness-105"
+              className="transition hover:brightness-105"
               aria-label="Volver al dashboard"
             >
-              <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
+              <Image
+                src="/logo.png"
+                alt="Tony's Kitchen Ops"
+                width={120}
+                height={120}
+                className="h-[5.75rem] w-[5.75rem] object-contain object-center"
+                unoptimized
+              />
             </Link>
           }
         />

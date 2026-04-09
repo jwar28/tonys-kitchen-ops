@@ -1,13 +1,12 @@
 import { AppTopbar } from "@/components/app-topbar";
+import { DashboardUserMenu } from "@/components/dashboard-user-menu";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Tables } from "@/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/utils";
 import { AlertTriangle, Package, Receipt, ShoppingBag, Store, Wallet } from "lucide-react";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -243,27 +242,7 @@ async function HomeContent() {
           eyebrow="Vista general"
           title="Dashboard"
           description={`${nombreNegocio} · ${dateLabel}`}
-          rightSlot={
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="relative grid size-[4.35rem] place-items-center overflow-hidden rounded-[1.35rem] border border-primary/15 bg-white/85 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.45)] transition hover:brightness-105"
-                  aria-label="Abrir menu de usuario"
-                >
-                  <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44 rounded-xl p-2">
-                <DropdownMenuLabel className="px-2 pb-1 text-xs text-muted-foreground">Sesion activa</DropdownMenuLabel>
-                <form action={signOutAction}>
-                  <Button type="submit" variant="outline" className="h-9 w-full rounded-lg text-sm">
-                    Cerrar sesion
-                  </Button>
-                </form>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          }
+          rightSlot={<DashboardUserMenu signOutAction={signOutAction} />}
         />
 
         {currentDay?.status === "open" ? (
