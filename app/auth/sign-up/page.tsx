@@ -13,7 +13,7 @@ export default function SignUpPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Link href="/" className="block">
+          <Link href="/login" className="block">
             <Button className="w-full">Volver al login</Button>
           </Link>
         </CardContent>
