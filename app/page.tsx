@@ -1,9 +1,10 @@
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { Tables } from "@/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { hasSupabaseEnv } from "@/lib/utils";
 import { AlertTriangle, Package, Receipt, ShoppingBag, Store, Wallet } from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -54,6 +55,31 @@ export default function Home() {
 }
 
 async function HomeContent() {
+  if (!hasSupabaseEnv) {
+    return (
+      <main className="px-4 pb-28 pt-6">
+        <div className="mx-auto w-full max-w-md space-y-4">
+          <Card className="rounded-[1.8rem] border-border/70 bg-card/95 shadow-[0_24px_50px_-42px_rgba(0,0,0,0.55)]">
+            <CardHeader>
+              <CardTitle className="text-xl">Falta configurar Supabase</CardTitle>
+              <CardDescription>
+                Agrega `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` en tu entorno para habilitar autenticacion y datos.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>Usa los valores desde tu proyecto en Supabase, en Settings &gt; API.</p>
+              <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 font-mono text-xs text-foreground/80">
+                NEXT_PUBLIC_SUPABASE_URL=...
+                <br />
+                NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -225,7 +251,7 @@ async function HomeContent() {
                 className="relative grid size-20 place-items-center overflow-hidden rounded-full transition hover:brightness-105"
                 aria-label="Abrir menu de usuario"
               >
-                <Image src="/logo.jpeg" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
+                <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 rounded-xl p-2">

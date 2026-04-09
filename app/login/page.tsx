@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/server";
+import { hasSupabaseEnv } from "@/lib/utils";
 import { Eye, Lock, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +17,40 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { error } = await searchParams;
+
+  if (!hasSupabaseEnv) {
+    return (
+      <main className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-4 sm:px-6 md:px-10">
+        <div className="mx-auto w-full max-w-md">
+          <div className="mb-4 flex flex-col items-center text-center">
+            <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
+              <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
+            </div>
+            <h1 className="text-4xl font-semibold tracking-tight text-primary">Tony&apos;s Kitchen Ops</h1>
+          </div>
+
+          <Card className="rounded-[1.8rem] border border-white/40 bg-[#f1f1f1]/95 px-4 py-4 shadow-[0_26px_70px_-42px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:px-6 sm:py-6">
+            <CardHeader className="space-y-1 p-0">
+              <CardTitle className="text-3xl tracking-tight text-foreground">Configura Supabase</CardTitle>
+              <CardDescription className="text-xs text-foreground/65">
+                Antes de iniciar sesion, agrega las variables del proyecto en `.env.local`.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-3 p-0 pt-4 text-sm text-muted-foreground">
+              <div className="rounded-[1.3rem] border border-primary/10 bg-primary/5 px-4 py-3 font-mono text-xs text-foreground/80">
+                NEXT_PUBLIC_SUPABASE_URL=...
+                <br />
+                NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+              </div>
+              <p>Encuentras estos valores en Supabase: Settings &gt; API.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -55,7 +90,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="mx-auto w-full max-w-md">
         <div className="mb-4 flex flex-col items-center text-center">
           <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
-            <Image src="/logo.jpeg" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
+            <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
           </div>
           <h1 className="text-4xl font-semibold tracking-tight text-primary">Tony&apos;s Kitchen Ops</h1>
           <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-foreground/60">Autenticidad en cada detalle</p>

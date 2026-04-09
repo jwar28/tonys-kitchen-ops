@@ -1,10 +1,15 @@
 import { updateSession } from "@/lib/supabase/proxy";
+import { hasSupabaseEnv } from "@/lib/utils";
 import { type NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_ROUTES = ["/login"];
 const PUBLIC_PREFIXES = ["/auth/confirm"];
 
 export async function proxy(request: NextRequest) {
+  if (!hasSupabaseEnv) {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const { response, user } = await updateSession(request);

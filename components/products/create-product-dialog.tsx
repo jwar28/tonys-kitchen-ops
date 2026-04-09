@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Enums } from "@/database.types";
-import { Plus } from "lucide-react";
+import { ImagePlus, Plus } from "lucide-react";
 
 type ProductCategory = Enums<"product_category">;
 
@@ -137,6 +137,28 @@ export function CreateProductDialog({ action, categories }: CreateProductDialogP
                 defaultValue={0}
                 className="h-12 rounded-2xl border-white/60 bg-white/90"
               />
+            </div>
+
+            <div className="rounded-[1.6rem] border border-primary/10 bg-white/70 p-4 shadow-[0_18px_36px_-34px_rgba(0,0,0,0.45)]">
+              <div className="mb-3 flex items-center gap-2 text-primary">
+                <ImagePlus className="size-4" />
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground/60">Referencia visual</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-reference-image" className="pl-1 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/55">
+                  Imagen del producto
+                </Label>
+                <Input
+                  id="create-reference-image"
+                  name="reference_image_file"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/jpg"
+                  className="h-12 rounded-2xl border-white/60 bg-white/90 file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
+                />
+                <p className="pl-1 text-xs text-muted-foreground">
+                  Se guarda en Supabase Storage con un nombre derivado del producto, por ejemplo `empanada_de_pollo.jpg`.
+                </p>
+              </div>
             </div>
 
             <Button type="submit" className="h-12 w-full rounded-2xl">

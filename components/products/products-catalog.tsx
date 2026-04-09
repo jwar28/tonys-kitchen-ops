@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import { Enums, Tables } from "@/database.types";
 import { cn } from "@/lib/utils";
-import { FolderOpen, Funnel, Package, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
+import { FolderOpen, Funnel, ImagePlus, Package, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 import { useState } from "react";
 
 type ProductRow = Tables<"products">;
@@ -41,6 +41,14 @@ function formatCurrency(amount: number, currencyCode: string) {
   } catch {
     return `$${Math.round(amount).toLocaleString("es-CO")}`;
   }
+}
+
+function getReferenceImageLabel(referenceImage: string | null) {
+  if (!referenceImage) {
+    return null;
+  }
+
+  return referenceImage.split("/").pop() ?? referenceImage;
 }
 
 export function ProductsCatalog({
@@ -179,10 +187,18 @@ export function ProductsCatalog({
                       >
                         {product.is_active ? "Activo" : "Inactivo"}
                       </Badge>
+                      {product.reference_image ? (
+                        <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-primary">
+                          Con imagen
+                        </Badge>
+                      ) : null}
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Se vende por {product.unit}.
                     </p>
+                    {product.reference_image ? (
+                      <p className="mt-1 text-xs text-muted-foreground">Archivo: {getReferenceImageLabel(product.reference_image)}</p>
+                    ) : null}
                   </div>
                   <div className="grid size-11 place-items-center rounded-2xl bg-secondary text-primary">
                     <Package className="size-5" />
@@ -258,6 +274,8 @@ export function ProductsCatalog({
             {editingProduct ? (
               <form action={updateProductAction} className="space-y-4 px-5 py-5">
                 <input type="hidden" name="product_id" value={editingProduct.id} />
+                <input type="hidden" name="current_name" value={editingProduct.name} />
+                <input type="hidden" name="current_reference_image" value={editingProduct.reference_image ?? ""} />
 
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-name" className="pl-1 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/55">
@@ -350,6 +368,32 @@ export function ProductsCatalog({
                     defaultValue={editingProduct.sort_order}
                     className="h-12 rounded-2xl border-white/60 bg-white/90"
                   />
+                </div>
+
+                <div className="rounded-[1.6rem] border border-primary/10 bg-white/70 p-4 shadow-[0_18px_36px_-34px_rgba(0,0,0,0.45)]">
+                  <div className="mb-3 flex items-center gap-2 text-primary">
+                    <ImagePlus className="size-4" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground/60">Referencia visual</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-reference-image" className="pl-1 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/55">
+                      Reemplazar imagen
+                    </Label>
+                    <Input
+                      id="edit-reference-image"
+                      name="reference_image_file"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/jpg"
+                      className="h-12 rounded-2xl border-white/60 bg-white/90 file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
+                    />
+                    {editingProduct.reference_image ? (
+                      <p className="pl-1 text-xs text-muted-foreground">
+                        Archivo actual: {getReferenceImageLabel(editingProduct.reference_image)}
+                      </p>
+                    ) : (
+                      <p className="pl-1 text-xs text-muted-foreground">Sube una imagen para reconocer el producto mas rapido en el catalogo.</p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-2">

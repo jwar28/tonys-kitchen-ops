@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Enums, Tables, TablesInsert, TablesUpdate } from "@/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { hasSupabaseEnv } from "@/lib/utils";
 import { ArrowUpDown, Package, Store, Tag, ToggleLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -32,6 +33,9 @@ const categoryOptions: Array<{
   { value: "bebida", label: "Bebidas", tone: "bg-sky-100 text-sky-900 border-sky-200" },
   { value: "otro", label: "Otros", tone: "bg-stone-200 text-stone-800 border-stone-300" },
 ];
+
+const productImagesBucket = "images";
+const productEditors = new Set<MembershipRow["role"]>(["owner", "manager"]);
 
 function isProductCategory(value: string | undefined): value is ProductCategory {
   return categoryOptions.some((option) => option.value === value);
@@ -100,6 +104,78 @@ function parseProductPayload(formData: FormData) {
   } satisfies Pick<TablesInsert<"products">, "name" | "unit" | "category" | "sale_price" | "cost_price" | "sort_order">;
 }
 
+function slugifyProductName(value: string) {
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/_+/g, "_");
+
+  return normalized || "producto";
+}
+
+function getImageExtension(file: File) {
+  const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+  if (fileExtension) {
+    return fileExtension;
+  }
+
+  if (file.type === "image/png") {
+    return "png";
+  }
+
+  if (file.type === "image/webp") {
+    return "webp";
+  }
+
+  return "jpg";
+}
+
+function buildProductImagePath(businessId: string, productName: string, file: File) {
+  return `products/${businessId}/${slugifyProductName(productName)}.${getImageExtension(file)}`;
+}
+
+function renameProductImagePath(currentPath: string, nextProductName: string) {
+  const segments = currentPath.split("/");
+  const currentFileName = segments.at(-1);
+
+  if (!currentFileName) {
+    return currentPath;
+  }
+
+  const extension = currentFileName.includes(".") ? currentFileName.split(".").pop() : "jpg";
+  segments[segments.length - 1] = `${slugifyProductName(nextProductName)}.${extension}`;
+
+  return segments.join("/");
+}
+
+function readOptionalImageFile(formData: FormData, key: string) {
+  const candidate = formData.get(key);
+
+  if (!(candidate instanceof File) || candidate.size === 0) {
+    return null;
+  }
+
+  if (!candidate.type.startsWith("image/")) {
+    throw new Error("La referencia visual debe ser una imagen valida.");
+  }
+
+  if (candidate.size > 5 * 1024 * 1024) {
+    throw new Error("La imagen no puede superar 5 MB.");
+  }
+
+  return candidate;
+}
+
+function formatSupabaseError(error: { message: string; details?: string | null; hint?: string | null; code?: string }) {
+  return [error.message, error.details, error.hint, error.code ? `codigo ${error.code}` : null]
+    .filter(Boolean)
+    .join(" | ");
+}
+
 async function requireViewerContext() {
   const supabase = await createClient();
   const {
@@ -127,6 +203,29 @@ async function requireViewerContext() {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
+
+  if (!hasSupabaseEnv) {
+    return (
+      <main className="px-4 pb-28 pt-6">
+        <div className="mx-auto w-full max-w-md">
+          <Card className="rounded-[1.8rem] border-border/70 bg-card/95">
+            <CardHeader>
+              <CardTitle>Falta configurar Supabase</CardTitle>
+              <CardDescription>
+                Agrega `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` para administrar el catalogo.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full">
+                <Link href="/">Volver al dashboard</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
   const { supabase, membership } = await requireViewerContext();
   const statusFilter = "active";
   const categoryFilter = "all";
@@ -140,9 +239,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       redirect("/products?error=No%20tienes%20un%20negocio%20asignado");
     }
 
+    if (!productEditors.has(membership.role)) {
+      redirect("/products?error=No%20tienes%20permisos%20para%20crear%20productos");
+    }
+
     let payload: TablesInsert<"products">;
+    let imageFile: File | null = null;
+    let uploadedImagePath: string | null = null;
 
     try {
+      imageFile = readOptionalImageFile(formData, "reference_image_file");
       payload = {
         ...parseProductPayload(formData),
         business_id: membership.business_id,
@@ -154,10 +260,44 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       redirect(`/products?error=${encodeURIComponent(message)}`);
     }
 
+    if (imageFile) {
+      uploadedImagePath = buildProductImagePath(membership.business_id, payload.name, imageFile);
+
+      const { error: uploadError } = await supabase.storage.from(productImagesBucket).upload(uploadedImagePath, imageFile, {
+        upsert: true,
+        contentType: imageFile.type,
+      });
+
+      if (uploadError) {
+        redirect(`/products?error=${encodeURIComponent(`No se pudo subir la imagen: ${uploadError.message}`)}`);
+      }
+
+      payload.reference_image = uploadedImagePath;
+    }
+
+    const { data: existingProduct } = await supabase
+      .from("products")
+      .select("id")
+      .eq("business_id", membership.business_id)
+      .eq("name", payload.name)
+      .maybeSingle();
+
+    if (existingProduct) {
+      if (uploadedImagePath) {
+        await supabase.storage.from(productImagesBucket).remove([uploadedImagePath]);
+      }
+
+      redirect("/products?error=Ya%20existe%20un%20producto%20con%20ese%20nombre");
+    }
+
     const { error } = await supabase.from("products").insert(payload);
 
     if (error) {
-      redirect("/products?error=No%20se%20pudo%20crear%20el%20producto");
+      if (uploadedImagePath) {
+        await supabase.storage.from(productImagesBucket).remove([uploadedImagePath]);
+      }
+
+      redirect(`/products?error=${encodeURIComponent(`No se pudo crear el producto: ${formatSupabaseError(error)}`)}`);
     }
 
     revalidatePath("/products");
@@ -169,18 +309,73 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
     const { supabase, membership } = await requireViewerContext();
     const productId = readRequiredString(formData, "product_id");
+    const currentName = readRequiredString(formData, "current_name");
+    const currentReferenceImage = readRequiredString(formData, "current_reference_image") || null;
 
     if (!membership) {
       redirect("/products?error=No%20tienes%20un%20negocio%20asignado");
     }
 
+    if (!productEditors.has(membership.role)) {
+      redirect("/products?error=No%20tienes%20permisos%20para%20editar%20productos");
+    }
+
     let payload: TablesUpdate<"products">;
+    let imageFile: File | null = null;
 
     try {
+      imageFile = readOptionalImageFile(formData, "reference_image_file");
       payload = parseProductPayload(formData);
     } catch (error) {
       const message = error instanceof Error ? error.message : "No se pudo validar el formulario.";
       redirect(`/products?error=${encodeURIComponent(message)}`);
+    }
+
+    if (imageFile) {
+      const nextReferenceImage = buildProductImagePath(membership.business_id, payload.name ?? currentName, imageFile);
+
+      const { error: uploadError } = await supabase.storage.from(productImagesBucket).upload(nextReferenceImage, imageFile, {
+        upsert: true,
+        contentType: imageFile.type,
+      });
+
+      if (uploadError) {
+        redirect(`/products?error=${encodeURIComponent(`No se pudo actualizar la imagen: ${uploadError.message}`)}`);
+      }
+
+      if (currentReferenceImage && currentReferenceImage !== nextReferenceImage) {
+        await supabase.storage.from(productImagesBucket).remove([currentReferenceImage]);
+      }
+
+      payload.reference_image = nextReferenceImage;
+    } else if (currentReferenceImage && payload.name && payload.name !== currentName) {
+      const renamedReferenceImage = renameProductImagePath(currentReferenceImage, payload.name);
+
+      if (renamedReferenceImage !== currentReferenceImage) {
+        const { error: moveError } = await supabase.storage
+          .from(productImagesBucket)
+          .move(currentReferenceImage, renamedReferenceImage);
+
+        if (moveError) {
+          redirect(`/products?error=${encodeURIComponent(`No se pudo renombrar la imagen actual: ${moveError.message}`)}`);
+        }
+
+        payload.reference_image = renamedReferenceImage;
+      }
+    }
+
+    if (payload.name && payload.name !== currentName) {
+      const { data: existingProduct } = await supabase
+        .from("products")
+        .select("id")
+        .eq("business_id", membership.business_id)
+        .eq("name", payload.name)
+        .neq("id", productId)
+        .maybeSingle();
+
+      if (existingProduct) {
+        redirect("/products?error=Ya%20existe%20otro%20producto%20con%20ese%20nombre");
+      }
     }
 
     const { error } = await supabase
@@ -190,7 +385,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       .eq("business_id", membership.business_id);
 
     if (error) {
-      redirect("/products?error=No%20se%20pudo%20actualizar%20el%20producto");
+      redirect(`/products?error=${encodeURIComponent(`No se pudo actualizar el producto: ${formatSupabaseError(error)}`)}`);
     }
 
     revalidatePath("/products");
