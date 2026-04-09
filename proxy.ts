@@ -1,10 +1,10 @@
-import { updateSession } from "@/lib/supabase/middleware";
+import { updateSession } from "@/lib/supabase/proxy";
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/auth/forgot-password", "/auth/sign-up"];
+const PUBLIC_ROUTES = ["/login"];
 const PUBLIC_PREFIXES = ["/auth/confirm"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const { response, user } = await updateSession(request);

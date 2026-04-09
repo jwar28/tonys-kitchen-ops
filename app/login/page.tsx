@@ -55,7 +55,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="mx-auto w-full max-w-md">
         <div className="mb-4 flex flex-col items-center text-center">
           <div className="relative mb-3 grid size-28 place-items-center overflow-hidden rounded-full">
-            <Image src="/logo.png" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
+            <Image src="/logo.jpeg" alt="Tony's Delicious" fill className="object-cover" priority unoptimized />
           </div>
           <h1 className="text-4xl font-semibold tracking-tight text-primary">Tony&apos;s Kitchen Ops</h1>
           <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-foreground/60">Autenticidad en cada detalle</p>

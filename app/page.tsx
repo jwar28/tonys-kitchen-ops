@@ -225,7 +225,7 @@ async function HomeContent() {
                 className="relative grid size-20 place-items-center overflow-hidden rounded-full transition hover:brightness-105"
                 aria-label="Abrir menu de usuario"
               >
-                <Image src="/logo.png" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
+                <Image src="/logo.jpeg" alt="Tony's Kitchen Ops" fill className="object-cover" unoptimized />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 rounded-xl p-2">
