@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitl
 import { Enums, Tables } from "@/database.types";
 import { cn } from "@/lib/utils";
 import { FolderOpen, Funnel, ImagePlus, Package, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 type ProductRow = Tables<"products">;
@@ -43,12 +44,14 @@ function formatCurrency(amount: number, currencyCode: string) {
   }
 }
 
-function getReferenceImageLabel(referenceImage: string | null) {
-  if (!referenceImage) {
+function getReferenceImageUrl(referenceImage: string | null) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!referenceImage || !supabaseUrl) {
     return null;
   }
 
-  return referenceImage.split("/").pop() ?? referenceImage;
+  return `${supabaseUrl}/storage/v1/object/public/images/${referenceImage}`;
 }
 
 export function ProductsCatalog({
@@ -165,12 +168,32 @@ export function ProductsCatalog({
         filteredProducts.map((product) => {
           const category = getCategoryMeta(product.category);
           const profit = product.sale_price - product.cost_price;
+          const referenceImageUrl = getReferenceImageUrl(product.reference_image);
 
           return (
             <Card key={product.id} className="overflow-hidden rounded-[1.8rem] border-border/65 bg-card/95 shadow-[0_24px_50px_-42px_rgba(0,0,0,0.55)]">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="relative h-[5.5rem] w-[5.75rem] shrink-0 overflow-hidden rounded-[1.55rem] border border-primary/10 bg-[linear-gradient(180deg,rgba(255,251,247,0.95),rgba(244,235,224,0.95))] shadow-[0_18px_35px_-28px_rgba(0,0,0,0.55)]">
+                      {referenceImageUrl ? (
+                        <Image
+                          src={referenceImageUrl}
+                          alt={`Referencia visual de ${product.name}`}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <div className="grid size-10 place-items-center rounded-2xl bg-white/80 text-primary shadow-sm">
+                            <Package className="size-4.5" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-lg font-semibold tracking-tight">{product.name}</h3>
                       <Badge variant="outline" className={cn("rounded-full px-2.5 py-1 text-[11px] uppercase tracking-[0.12em]", category.tone)}>
@@ -187,18 +210,11 @@ export function ProductsCatalog({
                       >
                         {product.is_active ? "Activo" : "Inactivo"}
                       </Badge>
-                      {product.reference_image ? (
-                        <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-primary">
-                          Con imagen
-                        </Badge>
-                      ) : null}
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Se vende por {product.unit}.
                     </p>
-                    {product.reference_image ? (
-                      <p className="mt-1 text-xs text-muted-foreground">Archivo: {getReferenceImageLabel(product.reference_image)}</p>
-                    ) : null}
+                  </div>
                   </div>
                   <div className="grid size-11 place-items-center rounded-2xl bg-secondary text-primary">
                     <Package className="size-5" />
@@ -386,13 +402,6 @@ export function ProductsCatalog({
                       accept="image/png,image/jpeg,image/webp,image/jpg"
                       className="h-12 rounded-2xl border-white/60 bg-white/90 file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
                     />
-                    {editingProduct.reference_image ? (
-                      <p className="pl-1 text-xs text-muted-foreground">
-                        Archivo actual: {getReferenceImageLabel(editingProduct.reference_image)}
-                      </p>
-                    ) : (
-                      <p className="pl-1 text-xs text-muted-foreground">Sube una imagen para reconocer el producto mas rapido en el catalogo.</p>
-                    )}
                   </div>
                 </div>
 

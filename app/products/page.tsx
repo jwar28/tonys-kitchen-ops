@@ -1,5 +1,6 @@
 import { CreateProductDialog } from "@/components/products/create-product-dialog";
 import { ProductsCatalog } from "@/components/products/products-catalog";
+import { ProductsStatusToast } from "@/components/products/products-status-toast";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -473,6 +474,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <main className="px-4 pb-28 pt-6">
       <div className="mx-auto w-full max-w-md space-y-5">
+        <ProductsStatusToast success={params.success} error={params.error} />
+
         <header className="relative overflow-hidden rounded-[2rem] border border-white/45 bg-[linear-gradient(140deg,rgba(255,255,255,0.95),rgba(242,234,225,0.9))] px-5 py-5 shadow-[0_30px_70px_-48px_rgba(0,0,0,0.6)]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(217,70,45,0.1),transparent_26%),radial-gradient(circle_at_90%_10%,rgba(255,202,116,0.18),transparent_24%)]" />
           <div className="relative flex items-start justify-between gap-4">
@@ -492,18 +495,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <p className="mt-1 text-lg font-semibold">{businessName}</p>
           </div>
         </header>
-
-        {params.success ? (
-          <Card className="rounded-[1.5rem] border-emerald-300/60 bg-emerald-50/90 shadow-[0_18px_45px_-36px_rgba(16,185,129,0.9)]">
-            <CardContent className="px-4 py-3 text-sm font-medium text-emerald-900">{params.success}</CardContent>
-          </Card>
-        ) : null}
-
-        {params.error ? (
-          <Card className="rounded-[1.5rem] border-destructive/25 bg-destructive/10 shadow-[0_18px_45px_-36px_rgba(220,38,38,0.85)]">
-            <CardContent className="px-4 py-3 text-sm font-medium text-destructive">{params.error}</CardContent>
-          </Card>
-        ) : null}
 
         <section className="grid grid-cols-2 gap-3">
           <Card className="rounded-[1.6rem] border-border/60 bg-card/95">

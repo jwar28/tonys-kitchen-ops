@@ -155,9 +155,6 @@ export function CreateProductDialog({ action, categories }: CreateProductDialogP
                   accept="image/png,image/jpeg,image/webp,image/jpg"
                   className="h-12 rounded-2xl border-white/60 bg-white/90 file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
                 />
-                <p className="pl-1 text-xs text-muted-foreground">
-                  Se guarda en Supabase Storage con un nombre derivado del producto, por ejemplo `empanada_de_pollo.jpg`.
-                </p>
               </div>
             </div>
 
